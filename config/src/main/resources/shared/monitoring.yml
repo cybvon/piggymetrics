@@ -1,0 +1,4 @@
+server:
+#  servlet:
+#    context-path: /notifications
+  port: 9000
