@@ -1,5 +1,6 @@
 package com.piggymetrics.auth.config;
 
+import com.piggymetrics.auth.library.MongoClientDetailsService;
 import com.piggymetrics.auth.service.security.MongoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,8 +30,11 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
 
 //    @Autowired
 //    private MongoTokenStore mongoTokenStore;
+    @Autowired
+    private MongoClientDetailsService mongoClientDetailsService(){return new MongoClientDetailsService();}
+
     @Bean
-    @Profile("!jwttoken")
+//    @Profile("!jwttoken")
     public MongoTokenStore tokenStore() {
         return new MongoTokenStore();
     }
@@ -52,27 +56,27 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 
         // TODO persist clients details
-
         // @formatter:off
-        clients.inMemory()
-                .withClient("browser")
-                .authorizedGrantTypes("refresh_token", "password")
-                .scopes("ui")
-                .and()
-                .withClient("account-service")
-                .secret(env.getProperty("ACCOUNT_SERVICE_PASSWORD"))
-                .authorizedGrantTypes("client_credentials", "refresh_token")
-                .scopes("server")
-                .and()
-                .withClient("statistics-service")
-                .secret(env.getProperty("STATISTICS_SERVICE_PASSWORD"))
-                .authorizedGrantTypes("client_credentials", "refresh_token")
-                .scopes("server")
-                .and()
-                .withClient("notification-service")
-                .secret(env.getProperty("NOTIFICATION_SERVICE_PASSWORD"))
-                .authorizedGrantTypes("client_credentials", "refresh_token")
-                .scopes("server");
+        clients.withClientDetails(mongoClientDetailsService());
+//        clients.inMemory()
+//                .withClient("browser")
+//                .authorizedGrantTypes("refresh_token", "password")
+//                .scopes("ui")
+//                .and()
+//                .withClient("account-service")
+//                .secret("123456"/*env.getProperty("ACCOUNT_SERVICE_PASSWORD")*/)
+//                .authorizedGrantTypes("client_credentials", "refresh_token")
+//                .scopes("server")
+//                .and()
+//                .withClient("statistics-service")
+//                .secret(env.getProperty("STATISTICS_SERVICE_PASSWORD"))
+//                .authorizedGrantTypes("client_credentials", "refresh_token")
+//                .scopes("server")
+//                .and()
+//                .withClient("notification-service")
+//                .secret(env.getProperty("NOTIFICATION_SERVICE_PASSWORD"))
+//                .authorizedGrantTypes("client_credentials", "refresh_token")
+//                .scopes("server");
         // @formatter:on
     }
 
