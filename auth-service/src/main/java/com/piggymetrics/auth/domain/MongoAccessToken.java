@@ -1,20 +1,19 @@
-package com.piggymetrics.auth.library.document;
+package com.piggymetrics.auth.domain;
 
-import com.piggymetrics.auth.library.converter.SerializableObjectConverter;
+import com.piggymetrics.auth.util.SerializableObjectConverter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
-//@Document(collection = "oauthAccessTokens")
-@Document(collection = "access_token")
+@Document
 public class MongoAccessToken {
 
     public static final String TOKEN_ID = "tokenId";
     public static final String REFRESH_TOKEN = "refreshToken";
     public static final String AUTHENTICATION_ID = "authenticationId";
     public static final String CLIENT_ID = "clientId";
-    public static final String USERNAME = "username";
+    public static final String USER_NAME = "username";
 
     @Id
     private String id;

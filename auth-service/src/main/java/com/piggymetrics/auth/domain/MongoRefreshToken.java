@@ -1,13 +1,12 @@
-package com.piggymetrics.auth.library.document;
+package com.piggymetrics.auth.domain;
 
-import com.piggymetrics.auth.library.converter.SerializableObjectConverter;
+import com.piggymetrics.auth.util.SerializableObjectConverter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
-//@Document(collection = "oauthRefreshTokens")
-@Document(collection = "refresh_token")
+@Document
 public class MongoRefreshToken {
 
     public static final String TOKEN_ID = "tokenId";
