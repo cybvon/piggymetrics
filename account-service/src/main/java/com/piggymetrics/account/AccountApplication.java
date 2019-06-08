@@ -24,7 +24,7 @@ public class AccountApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(AccountApplication.class, args);
-		System.out.println(env.getProperty("ACCOUNT_SERVICE_PASSWORD"));
+//		System.out.println(env.getProperty("ACCOUNT_SERVICE_PASSWORD"));
 	}
 
 }

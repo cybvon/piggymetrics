@@ -5,7 +5,12 @@ import com.piggymetrics.auth.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -21,7 +26,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserRepository repository;
 
-	@Override
+    @Override
 	public void create(User user) {
 
 		Optional<User> existing = repository.findById(user.getUsername());
@@ -34,4 +39,9 @@ public class UserServiceImpl implements UserService {
 
 		log.info("new user has been created: {}", user.getUsername());
 	}
+
+//	@Override
+//	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        return repository.findById(username).orElseThrow(()->new UsernameNotFoundException(username));
+//	}
 }

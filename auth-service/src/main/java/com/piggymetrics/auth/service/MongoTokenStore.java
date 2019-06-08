@@ -1,7 +1,7 @@
-package com.piggymetrics.auth.library;
+package com.piggymetrics.auth.service;
 
-import com.piggymetrics.auth.library.document.MongoAccessToken;
-import com.piggymetrics.auth.library.document.MongoRefreshToken;
+import com.piggymetrics.auth.domain.MongoAccessToken;
+import com.piggymetrics.auth.domain.MongoRefreshToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -133,7 +134,7 @@ public class MongoTokenStore implements TokenStore {
         MongoAccessToken mongoAccessToken = mongoTemplate.findOne(query, MongoAccessToken.class);
         if (mongoAccessToken != null) {
             accessToken = mongoAccessToken.getToken();
-            if(accessToken != null && !authenticationId.equals(this.authenticationKeyGenerator.extractKey(this.readAuthentication(accessToken)))) {
+            if (accessToken != null && !authenticationId.equals(this.authenticationKeyGenerator.extractKey(this.readAuthentication(accessToken)))) {
                 this.removeAccessToken(accessToken);
                 this.storeAccessToken(accessToken, authentication);
             }
@@ -143,22 +144,20 @@ public class MongoTokenStore implements TokenStore {
 
     @Override
     public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String username) {
-        Collection<OAuth2AccessToken> tokens = new ArrayList<OAuth2AccessToken>();
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoAccessToken.CLIENT_ID).is(clientId));
-        query.addCriteria(Criteria.where(MongoAccessToken.USERNAME).is(username));
-        List<MongoAccessToken> accessTokens = mongoTemplate.find(query, MongoAccessToken.class);
-        for (MongoAccessToken accessToken : accessTokens) {
-            tokens.add(accessToken.getToken());
-        }
-        return tokens;
+        return findTokensByCriteria(
+                Criteria.where(MongoAccessToken.CLIENT_ID).is(clientId)
+                        .and(MongoAccessToken.USER_NAME).is(username));
     }
 
     @Override
     public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
-        Collection<OAuth2AccessToken> tokens = new ArrayList<OAuth2AccessToken>();
+        return findTokensByCriteria(Criteria.where(MongoAccessToken.CLIENT_ID).is(clientId));
+    }
+
+    private Collection<OAuth2AccessToken> findTokensByCriteria(Criteria criteria) {
+        Collection<OAuth2AccessToken> tokens = new ArrayList<>();
         Query query = new Query();
-        query.addCriteria(Criteria.where(MongoAccessToken.CLIENT_ID).is(clientId));
+        query.addCriteria(criteria);
         List<MongoAccessToken> accessTokens = mongoTemplate.find(query, MongoAccessToken.class);
         for (MongoAccessToken accessToken : accessTokens) {
             tokens.add(accessToken.getToken());
@@ -167,7 +166,7 @@ public class MongoTokenStore implements TokenStore {
     }
 
     private String extractTokenKey(String value) {
-        if(value == null) {
+        if (value == null) {
             return null;
         } else {
             MessageDigest digest;
@@ -178,8 +177,8 @@ public class MongoTokenStore implements TokenStore {
             }
 
             try {
-                byte[] e = digest.digest(value.getBytes("UTF-8"));
-                return String.format("%032x", new Object[]{new BigInteger(1, e)});
+                byte[] e = digest.digest(value.getBytes(StandardCharsets.UTF_8.name()));
+                return String.format("%032x", new BigInteger(1, e));
             } catch (UnsupportedEncodingException var4) {
                 throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
             }
