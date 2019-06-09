@@ -53,6 +53,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+
         // @formatter:off
         clients.inMemory()
                 .withClient("browser")
@@ -75,7 +76,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
                 .scopes("server");
         // @formatter:on
 
-//        clients.withClientDetails(authClientDetailsService);
+        clients.withClientDetails(authClientDetailsService);
     }
 
     @Override

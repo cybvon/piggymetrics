@@ -9,4 +9,5 @@ public interface UserService {
 	void create(User user);
 
 //	UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+
 }
