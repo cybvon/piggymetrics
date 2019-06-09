@@ -3,6 +3,7 @@ package com.piggymetrics.auth.config;
 import com.piggymetrics.auth.service.MongoTokenStore;
 import com.piggymetrics.auth.service.AuthClientDetailsService;
 import com.piggymetrics.auth.service.CustomUserDetailsService;
+import com.piggymetrics.auth.service.security.MongoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +33,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private MongoUserDetailsService/*CustomUserDetailsService*/ userDetailsService;
 
     @Autowired
     private AuthClientDetailsService authClientDetailsService;
@@ -92,9 +93,9 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
         oauthServer
                 .tokenKeyAccess("permitAll()")
                 .checkTokenAccess("isAuthenticated()")
-//                .passwordEncoder(NoOpPasswordEncoder.getInstance());
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .allowFormAuthenticationForClients();
+                .passwordEncoder(NoOpPasswordEncoder.getInstance());
+//                .passwordEncoder(new BCryptPasswordEncoder())
+//                .allowFormAuthenticationForClients();
     }
 
 }

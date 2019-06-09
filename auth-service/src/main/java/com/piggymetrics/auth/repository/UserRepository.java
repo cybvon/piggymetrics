@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends CrudRepository<User, String> {
 //public interface UserRepository extends /*CrudRepository*/MongoRepository<User, String> {
+//    Optional<User> findByUsername(String username);
 
-    Optional<User> findByUsername(String username);
 }
