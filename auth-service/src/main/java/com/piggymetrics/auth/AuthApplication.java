@@ -40,7 +40,7 @@ public class AuthApplication {
         mongoTemplate.dropCollection(MongoAccessToken.class);
         mongoTemplate.dropCollection(MongoRefreshToken.class);
 
-
+        //////////////////////////////////
         Set<Authorities> authorities = new HashSet<>();
         authorities.add(Authorities.ROLE_USER);
 
@@ -51,6 +51,7 @@ public class AuthApplication {
         user.setUsername("admin");
         mongoTemplate.save(user);
 
+        //////////////////MongoClientDetails////////////////
         MongoClientDetails browserClientDetails = new MongoClientDetails();
         browserClientDetails.setClientId("browser");
 //        browserClientDetails.setClientSecret("$2a$10$jogpg/bxiyabTqOOUt.CLekoi3N36qYVt3oZEMuAxuQANxlx58nku");
@@ -58,6 +59,7 @@ public class AuthApplication {
         browserClientDetails.setGrantTypes("refresh_token,password");
         mongoTemplate.save(browserClientDetails);
 
+        //////////////////////////////////
         MongoClientDetails accountServiceClientDetails = new MongoClientDetails();
         accountServiceClientDetails.setClientId("account-service");
         accountServiceClientDetails.setClientSecret("$2a$10$jogpg/bxiyabTqOOUt.CLekoi3N36qYVt3oZEMuAxuQANxlx58nku");
@@ -76,6 +78,7 @@ public class AuthApplication {
 //        notification-service
 
         System.out.println("init complete~");
+
 
     }
 
