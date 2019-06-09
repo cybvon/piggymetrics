@@ -56,34 +56,34 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 
         // @formatter:off
-//        clients.inMemory()
-//                .withClient("browser")
-//                .authorizedGrantTypes("refresh_token", "password")
-//                .scopes("ui")
-//                .and()
-//                .withClient("account-service")
-//                .secret(env.getProperty("ACCOUNT_SERVICE_PASSWORD"))
-//                .authorizedGrantTypes("client_credentials", "refresh_token")
-//                .scopes("server")
-//                .and()
-//                .withClient("statistics-service")
-//                .secret(env.getProperty("STATISTICS_SERVICE_PASSWORD"))
-//                .authorizedGrantTypes("client_credentials", "refresh_token")
-//                .scopes("server")
-//                .and()
-//                .withClient("notification-service")
-//                .secret(env.getProperty("NOTIFICATION_SERVICE_PASSWORD"))
-//                .authorizedGrantTypes("client_credentials", "refresh_token")
-//                .scopes("server");
-        // @formatter:on
+        clients.inMemory()
+                .withClient("browser")
+                .authorizedGrantTypes("refresh_token", "password")
+                .scopes("ui")
+                .and()
+                .withClient("account-service")
+                .secret("123456"/*env.getProperty("ACCOUNT_SERVICE_PASSWORD")*/)
+                .authorizedGrantTypes("client_credentials", "refresh_token")
+                .scopes("server")
+                .and()
+                .withClient("statistics-service")
+                .secret("123456"/*env.getProperty("STATISTICS_SERVICE_PASSWORD")*/)
+                .authorizedGrantTypes("client_credentials", "refresh_token")
+                .scopes("server")
+                .and()
+                .withClient("notification-service")
+                .secret("123456"/*env.getProperty("NOTIFICATION_SERVICE_PASSWORD")*/)
+                .authorizedGrantTypes("client_credentials", "refresh_token")
+                .scopes("server");
+         //@formatter:on
 
-        clients.withClientDetails(authClientDetailsService);
+//        clients.withClientDetails(authClientDetailsService);
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(tokenStore())
+                .tokenStore(tokenStore)
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
     }
