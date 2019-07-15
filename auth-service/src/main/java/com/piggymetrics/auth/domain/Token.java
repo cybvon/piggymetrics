@@ -1,6 +1,7 @@
 package com.piggymetrics.auth.domain;
 
 import com.piggymetrics.auth.repository.TokenRepository;
+import com.piggymetrics.auth.util.SerializableObjectConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,189 +26,119 @@ import java.util.List;
 import java.util.Optional;
 
 @Document
-public class Token implements TokenStore {
+public class Token {
 
     public static final String TOKEN_ID = "tokenId";
-    public static final String REFRESH_TOKEN = "refreshToken";
+    public static final String REFRESH_TOKEN = "refreshTokenKey";
     public static final String AUTHENTICATION_ID = "authenticationId";
     public static final String CLIENT_ID = "clientId";
     public static final String USER_NAME = "username";
+
+    public static final String REFRESH_ID = "refreshId";
 
     @Id
     private String id;
 
     private String tokenId;
-    private OAuth2AccessToken accessToken;
-    private OAuth2RefreshToken refreshToken;
+    private OAuth2AccessToken token;
     private String authenticationId;
     private String username;
     private String clientId;
     private String authentication;
-//    private String refreshToken;
+    private String refreshTokenKey;
 
-    private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
+    private OAuth2RefreshToken refresh;
+    private String refreshId;
+    private String refreshAuthentication;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private TokenRepository repository;
-
-    @Override
-    public OAuth2Authentication readAuthentication(OAuth2AccessToken accessToken) {
-        return readAuthentication(accessToken.getValue());
+    public void setRefresh(OAuth2RefreshToken refreshToken) {
+        this.refresh = refreshToken;
     }
 
-    @Override
-    public OAuth2Authentication readAuthentication(String token) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoAccessToken.TOKEN_ID).is(extractTokenKey(token)));
-        MongoAccessToken mongoAccessToken = mongoTemplate.findOne(query, MongoAccessToken.class);
-//        return mongoAccessToken != null ? mongoAccessToken.getAuthentication() : null;
-
-//        Optional<Token> existing =repository.findById(extractTokenKey(token));
-        return repository.findById(extractTokenKey(token)).isPresent(it-> {it.});
+    public OAuth2RefreshToken getRefresh() {
+        return this.refresh;
     }
 
-    @Override
-    public void storeAccessToken(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-        String refreshToken = null;
-        if (accessToken.getRefreshToken() != null) {
-            refreshToken = accessToken.getRefreshToken().getValue();
-        }
-
-        if (readAccessToken(accessToken.getValue()) != null) {
-            this.removeAccessToken(accessToken);
-        }
-
-        MongoAccessToken mongoAccessToken = new MongoAccessToken();
-        mongoAccessToken.setTokenId(extractTokenKey(accessToken.getValue()));
-        mongoAccessToken.setToken(accessToken);
-        mongoAccessToken.setAuthenticationId(authenticationKeyGenerator.extractKey(authentication));
-        mongoAccessToken.setUsername(authentication.isClientOnly() ? null : authentication.getName());
-        mongoAccessToken.setClientId(authentication.getOAuth2Request().getClientId());
-        mongoAccessToken.setAuthentication(authentication);
-        mongoAccessToken.setRefreshToken(extractTokenKey(refreshToken));
-
-        mongoTemplate.save(mongoAccessToken);
+    public String getRefreshId() {
+        return refreshId;
     }
 
-    @Override
-    public OAuth2AccessToken readAccessToken(String tokenValue) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoAccessToken.TOKEN_ID).is(extractTokenKey(tokenValue)));
-
-        MongoAccessToken mongoAccessToken = mongoTemplate.findOne(query, MongoAccessToken.class);
-        return mongoAccessToken != null ? mongoAccessToken.getToken() : null;
+    public void setRefreshId(String refreshId) {
+        this.refreshId = refreshId;
     }
 
-    @Override
-    public void removeAccessToken(OAuth2AccessToken oAuth2AccessToken) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoAccessToken.TOKEN_ID).is(extractTokenKey(oAuth2AccessToken.getValue())));
-        mongoTemplate.remove(query, MongoAccessToken.class);
+    public OAuth2Authentication getRefreshAuthentication() {
+        return SerializableObjectConverter.deserialize(refreshAuthentication);
     }
 
-    @Override
-    public void storeRefreshToken(OAuth2RefreshToken refreshToken, OAuth2Authentication authentication) {
-        MongoRefreshToken token = new MongoRefreshToken();
-        token.setTokenId(extractTokenKey(refreshToken.getValue()));
-        token.setToken(refreshToken);
-        token.setAuthentication(authentication);
-        mongoTemplate.save(token);
+    public void setRefreshAuthentication(OAuth2Authentication authentication) {
+        this.refreshAuthentication = SerializableObjectConverter.serialize(authentication);
     }
 
-    @Override
-    public OAuth2RefreshToken readRefreshToken(String tokenValue) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoRefreshToken.TOKEN_ID).is(extractTokenKey(tokenValue)));
+    ///////////////////////////////////
 
-        MongoRefreshToken mongoRefreshToken = mongoTemplate.findOne(query, MongoRefreshToken.class);
-        return mongoRefreshToken != null ? mongoRefreshToken.getToken() : null;
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public OAuth2Authentication readAuthenticationForRefreshToken(OAuth2RefreshToken refreshToken) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoRefreshToken.TOKEN_ID).is(extractTokenKey(refreshToken.getValue())));
-
-        MongoRefreshToken mongoRefreshToken = mongoTemplate.findOne(query, MongoRefreshToken.class);
-        return mongoRefreshToken != null ? mongoRefreshToken.getAuthentication() : null;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    @Override
-    public void removeRefreshToken(OAuth2RefreshToken refreshToken) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoRefreshToken.TOKEN_ID).is(extractTokenKey(refreshToken.getValue())));
-        mongoTemplate.remove(query, MongoRefreshToken.class);
+    public String getTokenId() {
+        return tokenId;
     }
 
-    @Override
-    public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoAccessToken.REFRESH_TOKEN).is(extractTokenKey(refreshToken.getValue())));
-        mongoTemplate.remove(query, MongoAccessToken.class);
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
     }
 
-    @Override
-    public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
-        OAuth2AccessToken accessToken = null;
-        String authenticationId = authenticationKeyGenerator.extractKey(authentication);
-
-        Query query = new Query();
-        query.addCriteria(Criteria.where(MongoAccessToken.AUTHENTICATION_ID).is(authenticationId));
-
-        MongoAccessToken mongoAccessToken = mongoTemplate.findOne(query, MongoAccessToken.class);
-        if (mongoAccessToken != null) {
-            accessToken = mongoAccessToken.getToken();
-            if (accessToken != null && !authenticationId.equals(this.authenticationKeyGenerator.extractKey(this.readAuthentication(accessToken)))) {
-                this.removeAccessToken(accessToken);
-                this.storeAccessToken(accessToken, authentication);
-            }
-        }
-        return accessToken;
+    public OAuth2AccessToken getToken() {
+        return token;
     }
 
-    @Override
-    public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String username) {
-        return findTokensByCriteria(
-                Criteria.where(MongoAccessToken.CLIENT_ID).is(clientId)
-                        .and(MongoAccessToken.USER_NAME).is(username));
+    public void setToken(OAuth2AccessToken token) {
+        this.token = token;
     }
 
-    @Override
-    public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
-        return findTokensByCriteria(Criteria.where(MongoAccessToken.CLIENT_ID).is(clientId));
+    public String getAuthenticationId() {
+        return authenticationId;
     }
 
-    private Collection<OAuth2AccessToken> findTokensByCriteria(Criteria criteria) {
-        Collection<OAuth2AccessToken> tokens = new ArrayList<>();
-        Query query = new Query();
-        query.addCriteria(criteria);
-        List<MongoAccessToken> accessTokens = mongoTemplate.find(query, MongoAccessToken.class);
-        for (MongoAccessToken accessToken : accessTokens) {
-            tokens.add(accessToken.getToken());
-        }
-        return tokens;
+    public void setAuthenticationId(String authenticationId) {
+        this.authenticationId = authenticationId;
     }
 
-    private String extractTokenKey(String value) {
-        if (value == null) {
-            return null;
-        } else {
-            MessageDigest digest;
-            try {
-                digest = MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException var5) {
-                throw new IllegalStateException("MD5 algorithm not available.  Fatal (should be in the JDK).");
-            }
-
-            try {
-                byte[] e = digest.digest(value.getBytes(StandardCharsets.UTF_8.name()));
-                return String.format("%032x", new BigInteger(1, e));
-            } catch (UnsupportedEncodingException var4) {
-                throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
-            }
-        }
+    public String getUsername() {
+        return username;
     }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public OAuth2Authentication getAuthentication() {
+        return SerializableObjectConverter.deserialize(authentication);
+    }
+
+    public void setAuthentication(OAuth2Authentication authentication) {
+        this.authentication = SerializableObjectConverter.serialize(authentication);
+    }
+
+    public String getRefreshToken() {
+        return refreshTokenKey;
+    }
+
+    public void setRefreshToken(String refreshTokenKey) {
+        this.refreshTokenKey = refreshTokenKey;
+    }
+
 }

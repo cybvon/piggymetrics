@@ -1,11 +1,16 @@
 package com.piggymetrics.auth.service.security;
 
+import com.mongodb.client.result.UpdateResult;
 import com.piggymetrics.auth.domain.MongoAccessToken;
 import com.piggymetrics.auth.domain.MongoRefreshToken;
+import com.piggymetrics.auth.domain.Token;
+import com.piggymetrics.auth.util.SerializableObjectConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -23,7 +28,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Service
+@Service("MongoTokenStoreService")
+@Primary
 public class MongoTokenStoreService implements TokenStore {
 
     private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
@@ -46,16 +52,15 @@ public class MongoTokenStoreService implements TokenStore {
     }
 
     @Override
-    public void storeAccessToken(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+    public void storeAccessToken(OAuth2AccessToken oAuth2AccessToken, OAuth2Authentication oAuth2Authentication) {
         String refreshToken = null;
-        if (accessToken.getRefreshToken() != null) {
-            refreshToken = accessToken.getRefreshToken().getValue();
+        if (oAuth2AccessToken.getRefreshToken() != null) {
+            refreshToken = oAuth2AccessToken.getRefreshToken().getValue();
         }
 
-        if (readAccessToken(accessToken.getValue()) != null) {
-            this.removeAccessToken(accessToken);
+/*         if (readAccessToken(oAuth2AccessToken.getValue()) != null) {
+            this.removeAccessToken(oAuth2AccessToken);
         }
-
         MongoAccessToken mongoAccessToken = new MongoAccessToken();
         mongoAccessToken.setTokenId(extractTokenKey(accessToken.getValue()));
         mongoAccessToken.setToken(accessToken);
@@ -64,8 +69,19 @@ public class MongoTokenStoreService implements TokenStore {
         mongoAccessToken.setClientId(authentication.getOAuth2Request().getClientId());
         mongoAccessToken.setAuthentication(authentication);
         mongoAccessToken.setRefreshToken(extractTokenKey(refreshToken));
+        mongoTemplate.save(mongoAccessToken);*/
 
-        mongoTemplate.save(mongoAccessToken);
+        Query query = Query.query(Criteria.where(MongoAccessToken.TOKEN_ID).is(extractTokenKey(oAuth2AccessToken.getValue())));
+        Update update = Update.update("tokenId", extractTokenKey(oAuth2AccessToken.getValue()))
+                .set("token", oAuth2AccessToken)
+                .set("authenticationId", (authenticationKeyGenerator.extractKey(oAuth2Authentication)))
+                .set("username", (oAuth2Authentication.isClientOnly() ? null : oAuth2Authentication.getName()))
+                .set("clientID", oAuth2Authentication.getOAuth2Request().getClientId())
+                .set("authentication", SerializableObjectConverter.serialize(oAuth2Authentication))
+                .set("refreshTokenKey", extractTokenKey(refreshToken));
+        UpdateResult updateResult = mongoTemplate.upsert(query, update, MongoAccessToken.class);
+        System.out.println("storeAccessToken result:" + updateResult.wasAcknowledged());
+
     }
 
     @Override
@@ -79,9 +95,21 @@ public class MongoTokenStoreService implements TokenStore {
 
     @Override
     public void removeAccessToken(OAuth2AccessToken oAuth2AccessToken) {
-        Query query = new Query();
+/*        Query query = new Query();
         query.addCriteria(Criteria.where(MongoAccessToken.TOKEN_ID).is(extractTokenKey(oAuth2AccessToken.getValue())));
         mongoTemplate.remove(query, MongoAccessToken.class);
+*/
+        Query query = Query.query(Criteria.where(MongoAccessToken.TOKEN_ID).is(extractTokenKey(oAuth2AccessToken.getValue())));
+        Update update = Update.update("tokenId", "")
+                .set("token", null)
+                .set("authenticationId", "")
+                .set("username", "")
+                .set("clientID", "")
+                .set("authentication", "")
+                .unset("refreshToken");
+        UpdateResult updateResult=mongoTemplate.updateFirst(query, update, MongoAccessToken.class);
+        System.out.println("removeAccessToken result:"+updateResult.wasAcknowledged());
+
     }
 
     @Override
@@ -122,7 +150,9 @@ public class MongoTokenStoreService implements TokenStore {
     public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
         Query query = new Query();
         query.addCriteria(Criteria.where(MongoAccessToken.REFRESH_TOKEN).is(extractTokenKey(refreshToken.getValue())));
-        mongoTemplate.remove(query, MongoAccessToken.class);
+//        mongoTemplate.remove(query, MongoAccessToken.class);
+        MongoAccessToken accessToken=mongoTemplate.findOne(query,MongoAccessToken.class);
+        this.removeAccessToken(accessToken.getToken());
     }
 
     @Override
@@ -136,8 +166,8 @@ public class MongoTokenStoreService implements TokenStore {
         MongoAccessToken mongoAccessToken = mongoTemplate.findOne(query, MongoAccessToken.class);
         if (mongoAccessToken != null) {
             accessToken = mongoAccessToken.getToken();
-            if (accessToken != null && !authenticationId.equals(this.authenticationKeyGenerator.extractKey(this.readAuthentication(accessToken)))) {
-                this.removeAccessToken(accessToken);
+            if (accessToken != null && !authenticationId.equals(authenticationKeyGenerator.extractKey(this.readAuthentication(accessToken)))) {
+//                this.removeAccessToken(accessToken);
                 this.storeAccessToken(accessToken, authentication);
             }
         }
@@ -174,14 +204,14 @@ public class MongoTokenStoreService implements TokenStore {
             MessageDigest digest;
             try {
                 digest = MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException var5) {
-                throw new IllegalStateException("MD5 algorithm not available.  Fatal (should be in the JDK).");
-            }
+//            } catch (NoSuchAlgorithmException var5) {
+//                throw new IllegalStateException("MD5 algorithm not available.  Fatal (should be in the JDK).");
+//            }
 
-            try {
+//            try {
                 byte[] e = digest.digest(value.getBytes(StandardCharsets.UTF_8.name()));
                 return String.format("%032x", new BigInteger(1, e));
-            } catch (UnsupportedEncodingException var4) {
+            } catch (/*UnsupportedEncodingException*/ Exception var4) {
                 throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
             }
         }

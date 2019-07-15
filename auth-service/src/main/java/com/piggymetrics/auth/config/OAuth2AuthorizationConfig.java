@@ -1,5 +1,6 @@
 package com.piggymetrics.auth.config;
 
+import com.piggymetrics.auth.service.TokenStoreService;
 import com.piggymetrics.auth.service.security.MongoClientDetailsService;
 import com.piggymetrics.auth.service.security.MongoTokenStoreService;
 import com.piggymetrics.auth.service.security.MongoUserDetailsService;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 
 
 /**
@@ -34,8 +36,14 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
 
 //    @Bean
 //    public Token tokenStore() {        return new MongoTokenStore();    }
+
     @Autowired
-    public MongoTokenStoreService mongoTokenStore;
+    @Qualifier("TokenStoreService")
+    private TokenStore tokenStore;
+
+    @Autowired
+    @Qualifier("MongoTokenStoreService")
+    private TokenStore mongoTokenStore;
 
     private final String NOOP_PASSWORD_ENCODE = "{noop}";
 
@@ -48,7 +56,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(mongoTokenStore/*tokenStore()*/)
+                .tokenStore(mongoTokenStore/*tokenStore*/)
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
     }
