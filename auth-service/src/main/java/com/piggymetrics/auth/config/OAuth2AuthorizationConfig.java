@@ -1,8 +1,6 @@
 package com.piggymetrics.auth.config;
 
-import com.piggymetrics.auth.service.TokenStoreService;
 import com.piggymetrics.auth.service.security.MongoClientDetailsService;
-import com.piggymetrics.auth.service.security.MongoTokenStoreService;
 import com.piggymetrics.auth.service.security.MongoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,14 +37,13 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
 
     @Autowired
     @Qualifier("TokenStoreService")
-    private TokenStore tokenStore;
+    private TokenStore t1;
 
     @Autowired
     @Qualifier("MongoTokenStoreService")
     private TokenStore mongoTokenStore;
 
     private final String NOOP_PASSWORD_ENCODE = "{noop}";
-
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -56,7 +53,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(mongoTokenStore/*tokenStore*/)
+                .tokenStore(t1/*mongoTokenStore*/)
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
     }

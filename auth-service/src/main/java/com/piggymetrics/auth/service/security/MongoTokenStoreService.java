@@ -6,6 +6,7 @@ import com.piggymetrics.auth.domain.MongoRefreshToken;
 import com.piggymetrics.auth.domain.Token;
 import com.piggymetrics.auth.util.SerializableObjectConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -29,7 +30,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Service("MongoTokenStoreService")
-@Primary
+//@Primary
 public class MongoTokenStoreService implements TokenStore {
 
     private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
