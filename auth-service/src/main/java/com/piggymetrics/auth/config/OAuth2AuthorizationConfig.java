@@ -1,9 +1,11 @@
 package com.piggymetrics.auth.config;
 
-import com.piggymetrics.auth.service.security.MongoClientDetailsService;
-import com.piggymetrics.auth.service.security.MongoUserDetailsService;
+import com.piggymetrics.auth.service.AuthClientDetailsService;
+import com.piggymetrics.auth.service.CustomUserDetailsService;
+import com.piggymetrics.auth.service.security.MongoTokenStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,18 +29,13 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private MongoUserDetailsService/*CustomUserDetailsService*/ userDetailsService;
+    private CustomUserDetailsService userDetailsService;
 
     @Autowired
-    private MongoClientDetailsService/*AuthClientDetailsService*/ authClientDetailsService;
+    private AuthClientDetailsService authClientDetailsService;
 
-//    @Bean
-//    public Token tokenStore() {        return new MongoTokenStore();    }
-
-    @Autowired
-    private TokenStore tokenStore;
-
-//    private final String NOOP_PASSWORD_ENCODE = "{noop}";
+    @Bean
+    public TokenStore tokenStore() {        return new MongoTokenStore();    }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -48,7 +45,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(tokenStore)
+                .tokenStore(tokenStore())
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
     }

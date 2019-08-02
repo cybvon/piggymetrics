@@ -1,4 +1,4 @@
-package com.piggymetrics.auth.service;
+package com.piggymetrics.auth.service.security;
 
 import com.mongodb.client.result.UpdateResult;
 import com.piggymetrics.auth.domain.Token;
@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Service("TokenStoreService")
+@Service("MongoTokenStore")
 @Primary
-public class TokenStoreService implements TokenStore {
+public class MongoTokenStore implements TokenStore {
 
     private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
 

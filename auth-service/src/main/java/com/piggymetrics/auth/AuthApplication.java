@@ -1,23 +1,11 @@
 package com.piggymetrics.auth;
 
 
-import com.piggymetrics.auth.domain.MongoClientDetails;
-import com.piggymetrics.auth.domain.MongoAccessToken;
-import com.piggymetrics.auth.domain.MongoRefreshToken;
-import com.piggymetrics.auth.domain.User;
-import com.piggymetrics.auth.enums.Authorities;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Environment;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @SpringBootApplication
 @EnableResourceServer
