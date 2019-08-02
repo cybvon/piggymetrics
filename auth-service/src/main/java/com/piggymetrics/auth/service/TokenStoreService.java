@@ -1,16 +1,11 @@
 package com.piggymetrics.auth.service;
 
 import com.mongodb.client.result.UpdateResult;
-import com.piggymetrics.auth.domain.MongoAccessToken;
-import com.piggymetrics.auth.domain.MongoRefreshToken;
 import com.piggymetrics.auth.domain.Token;
 import com.piggymetrics.auth.util.SerializableObjectConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -168,7 +163,7 @@ public class TokenStoreService implements TokenStore {
     public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken oAuth2RefreshToken) {
         Query query = new Query();
         query.addCriteria(Criteria.where(Token.REFRESH_TOKEN).is(extractTokenKey(oAuth2RefreshToken.getValue())));
-        //
+
         Token token = mongoTemplate.findOne(query, Token.class);
         System.out.println("removeAccessToken result:"+token);
         this.removeAccessToken(token.getToken());

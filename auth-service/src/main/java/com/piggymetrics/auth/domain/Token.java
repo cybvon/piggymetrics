@@ -1,29 +1,11 @@
 package com.piggymetrics.auth.domain;
 
-import com.piggymetrics.auth.repository.TokenRepository;
 import com.piggymetrics.auth.util.SerializableObjectConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.token.AuthenticationKeyGenerator;
-import org.springframework.security.oauth2.provider.token.DefaultAuthenticationKeyGenerator;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 
 @Document
 public class Token {
@@ -33,7 +15,6 @@ public class Token {
     public static final String AUTHENTICATION_ID = "authenticationId";
     public static final String CLIENT_ID = "clientId";
     public static final String USER_NAME = "username";
-
     public static final String REFRESH_ID = "refreshId";
 
     @Id

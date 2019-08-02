@@ -3,11 +3,8 @@ package com.piggymetrics.auth.service.security;
 import com.mongodb.client.result.UpdateResult;
 import com.piggymetrics.auth.domain.MongoAccessToken;
 import com.piggymetrics.auth.domain.MongoRefreshToken;
-import com.piggymetrics.auth.domain.Token;
 import com.piggymetrics.auth.util.SerializableObjectConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -20,11 +17,9 @@ import org.springframework.security.oauth2.provider.token.DefaultAuthenticationK
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

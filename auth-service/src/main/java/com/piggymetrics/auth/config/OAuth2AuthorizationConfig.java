@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -36,14 +36,9 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
 //    public Token tokenStore() {        return new MongoTokenStore();    }
 
     @Autowired
-    @Qualifier("TokenStoreService")
-    private TokenStore t1;
+    private TokenStore tokenStore;
 
-    @Autowired
-    @Qualifier("MongoTokenStoreService")
-    private TokenStore mongoTokenStore;
-
-    private final String NOOP_PASSWORD_ENCODE = "{noop}";
+//    private final String NOOP_PASSWORD_ENCODE = "{noop}";
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
@@ -53,7 +48,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(t1/*mongoTokenStore*/)
+                .tokenStore(tokenStore)
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
     }
@@ -63,7 +58,8 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
         oauthServer
                 .tokenKeyAccess("permitAll()")
                 .checkTokenAccess("isAuthenticated()")
-                .passwordEncoder(NoOpPasswordEncoder.getInstance());
+//                .passwordEncoder(NoOpPasswordEncoder.getInstance());
+                .passwordEncoder(new BCryptPasswordEncoder());
 
     }
 
