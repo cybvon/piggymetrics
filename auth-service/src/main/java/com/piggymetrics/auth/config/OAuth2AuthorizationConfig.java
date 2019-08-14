@@ -1,7 +1,7 @@
 package com.piggymetrics.auth.config;
 
-import com.piggymetrics.auth.service.AuthClientDetailsService;
-import com.piggymetrics.auth.service.CustomUserDetailsService;
+import com.piggymetrics.auth.service.security.AuthClientDetailsService;
+import com.piggymetrics.auth.service.security.MongoUserDetailsService;
 import com.piggymetrics.auth.service.security.MongoTokenStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
 
@@ -29,7 +30,7 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private MongoUserDetailsService userDetailsService;
 
     @Autowired
     private AuthClientDetailsService authClientDetailsService;
@@ -48,6 +49,17 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
                 .tokenStore(tokenStore())
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService);
+
+        // 配置TokenServices参数
+        DefaultTokenServices tokenServices = new DefaultTokenServices();
+        tokenServices.setTokenStore(endpoints.getTokenStore());
+        tokenServices.setSupportRefreshToken(false);
+        tokenServices.setClientDetailsService(endpoints.getClientDetailsService());
+        tokenServices.setTokenEnhancer(endpoints.getTokenEnhancer());
+        tokenServices.setAccessTokenValiditySeconds(10); // 30天(int) TimeUnit.DAYS.toSeconds(30)
+
+        endpoints.tokenServices(tokenServices);
+
     }
 
     @Override

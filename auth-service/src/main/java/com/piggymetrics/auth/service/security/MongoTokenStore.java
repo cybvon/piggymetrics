@@ -220,8 +220,8 @@ public class MongoTokenStore implements TokenStore {
             MessageDigest digest;
             try {
                 digest = MessageDigest.getInstance("MD5");
-                byte[] e = digest.digest(value.getBytes(StandardCharsets.UTF_8.name()));
-                return String.format("%032x", new BigInteger(1, e));
+                byte[] bytes = digest.digest(value.getBytes(StandardCharsets.UTF_8.name()));
+                return String.format("%032x", new BigInteger(1, bytes));
             } catch (/*UnsupportedEncoding*/Exception var4) {
                 throw new IllegalStateException("UTF-8 encoding not available.  Fatal (should be in the JDK).");
             }

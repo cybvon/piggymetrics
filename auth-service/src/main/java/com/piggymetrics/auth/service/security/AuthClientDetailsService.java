@@ -1,4 +1,4 @@
-package com.piggymetrics.auth.service;
+package com.piggymetrics.auth.service.security;
 
 import com.piggymetrics.auth.repository.AuthClientRepository;
 import org.springframework.security.oauth2.provider.ClientDetails;
